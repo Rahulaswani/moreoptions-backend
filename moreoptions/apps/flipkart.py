@@ -11,7 +11,8 @@ import os
 import json
 import sys
 
-from net.request import *
+from util.read_configuration import *
+from util.net.request import *
 
 class FlipkartApi(object):
   def __init__(self):
@@ -47,10 +48,15 @@ class FlipkartApi(object):
     """
     Function to send request to flipkart server.
     """
-    url = "https://affiliate-api.flipkart.net/affiliate/search/json?query=%s&resultCount=4" % (product_name)
-    header = ['Fk-Affiliate-Id: helpmoreo',
-              'Fk-Affiliate-Token: 9b7f9c7d972d46b2a4e88ca1f87923d8',
-              'Content-Type: application/json']
+    file_name = "/root/workshop/moreoptions-backend/moreoptions/config/flipkart_api.json"
+    read_configuration = ReadConfiguration()
+    data = read_configuration.read_conf(file_name)
+    url = data["url"] % (product_name)
+    header = []
+    header_json = data["headers"]
+    for key in header_json:
+      val = header_json[key]
+      header.append(key + ": " + val)
     return self.request_ob.send_request(url, header) 
 
   def process_result(self, result):

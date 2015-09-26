@@ -1,0 +1,10 @@
+{
+"AppName" : "Flipkart",
+"PackageName": "com.flipkart.android",
+"url": "https://affiliate-api.flipkart.net/affiliate/search/json?query=%s&resultCount=4",
+"headers": {
+             "Fk-Affiliate-Id": "helpmoreo",
+             "Fk-Affiliate-Token": "9b7f9c7d972d46b2a4e88ca1f87923d8",
+             "Content-Type": "application/json"
+           }
+}

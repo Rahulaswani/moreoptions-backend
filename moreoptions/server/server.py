@@ -12,12 +12,17 @@ import xml.etree.ElementTree as ET
 from apps.flipkart import *
 from StringIO import StringIO
 from urllib import urlencode
+from util.read_configuration import *
 
 
 def get_result(data):
   #TODO: Go over all the apps to call and call send_request for those
-  flipkart_api = FlipkartApi()
-  return flipkart_api.get_more_options(data)  
+  file_name = "/root/workshop/moreoptions-backend/moreoptions/config/apps.json"
+  read_configuration = ReadConfiguration()
+  apps = read_configuration.read_conf(file_name)
+  for key, value in apps.iteritems():
+    api = globals()[value]()
+    return api.get_more_options(data)  
 
 urls = (
     '/put', 'moreoptions_put',
