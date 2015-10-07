@@ -11,12 +11,14 @@ import os
 import json
 import sys
 
+from amazonproduct import API
 from util.read_configuration import *
 from util.net.request import *
+from lxml import etree as ET
 
-class FlipkartApi(object):
+class AmazonApi(object):
   def __init__(self):
-    self.request_ob = Request() 
+    pass
 
   def get_more_options(self, data):
     """
@@ -39,38 +41,37 @@ class FlipkartApi(object):
 
   def send_request(self, product_name):
     """
-    Function to send request to flipkart server.
+    Function to send request to amazon server.
     """
-    file_name = "/root/workshop/moreoptions-backend/moreoptions/config/flipkart_api.json"
+    file_name = "/root/workshop/moreoptions-backend/moreoptions/config/amazon_api.json"
     read_configuration = ReadConfiguration()
     data = read_configuration.read_conf(file_name)
-    url = data["url"] % (product_name)
-    header = []
-    header_json = data["headers"]
-    for key in header_json:
-      val = header_json[key]
-      header.append(key + ": " + val)
-    return self.request_ob.send_request(url, header) 
+    #self.num_results = data["NumResults"]
+    api = API(locale='us')
+    items = api.item_search("All", Keywords = product_name, ResponseGroup='Large',ItemPage = 1)
+    return items
 
   def process_result(self, result):
     """
     Function to massage result according to our need.
     """
-    json_output = json.loads(result)['productInfoList']
     json_result = []
     i = 0
-    for prod in json_output:
+    for item in result:
       if i > 2:
         break
-      i = i + 1
-      attr = prod['productBaseInfo']['productAttributes']
+      i = i+1
       temp_ar = {}
-      temp_ar['appName'] = "Flipkart"
-      temp_ar['productName'] = attr['title']
-      temp_ar['productImageUrls'] = []
-      for key, value in attr['imageUrls'].items():
-        temp_ar['productImageUrls'].append(value)
-      temp_ar['productSellingPrice'] = str(attr['sellingPrice']['amount'])
-      temp_ar['productURL'] = attr['productUrl']
+      temp_ar['appName'] = "Amazon"
+      temp_ar['productName'] = item.ItemAttributes.Title.text
+
+      temp_pic = []
+      temp_pic.append(item.SmallImage.URL.text)
+      temp_pic.append(item.MediumImage.URL.text)
+      temp_pic.append(item.LargeImage.URL.text)
+      temp_ar['productImageUrls'] = temp_pic
+
+      temp_ar['productSellingPrice'] = item.OfferSummary.LowestNewPrice.FormattedPrice.text
+      temp_ar['productURL'] = item.DetailPageURL.text
       json_result.append(temp_ar)
     return json.JSONEncoder().encode(json_result)

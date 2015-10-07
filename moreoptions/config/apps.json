@@ -1,3 +1,4 @@
 {
-"com.flipkart.android" : "FlipkartApi"
+"com.flipkart.android" : "FlipkartApi",
+"in.amazon.mShop.android.shopping":"AmazonApi"
 }
