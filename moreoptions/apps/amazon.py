@@ -24,11 +24,14 @@ class AmazonApi(object):
     """
     Function to get more options corresponding to data given for flipkart
     """
-    name = self.get_product_name(data)
-    if name == "":
-      return {}
-    result = self.send_request(name)
-    return self.process_result(result)
+    try:
+      name = self.get_product_name(data)
+      if name == "":
+        return {}
+      result = self.send_request(name)
+      return self.process_result(result)
+    except:
+      return None 
 
   def get_product_name(self, data):
     """

@@ -43,21 +43,4 @@ def get_result(data):
     a = queue.get()
     for i in json.loads(a):
       result.append(i)
-  return json.JSONEncoder().encode(result)
-
-urls = (
-    '/put', 'moreoptions_put',
-)
-
-class moreoptions_put:
- def PUT(self):
-   try:
-     data = web.data() 
-     #TODO: If name is null then do something.
-     return get_result(data)
-   except Exception, e:
-     print str(e)
-
-if __name__ == "__main__":
-    app = web.application(urls, globals())
-    app.run()
+  return result
