@@ -67,9 +67,17 @@ class FlipkartApi(object):
       temp_ar = {}
       temp_ar['appName'] = "Flipkart"
       temp_ar['productName'] = attr['title']
-      temp_ar['productImageUrls'] = []
+      temp_ar['productImage'] = []
       for key, value in attr['imageUrls'].items():
-        temp_ar['productImageUrls'].append(value)
+        temp_pic = {}
+        # get height width
+        if key == "unknown":
+          continue
+        hw = key.split('x')
+        temp_pic['width'] = hw[0]
+        temp_pic['height'] = hw[1]
+        temp_pic['url'] = value 
+        temp_ar['productImage'].append(temp_pic)
       temp_ar['productSellingPrice'] = str(attr['sellingPrice']['amount'])
       temp_ar['productURL'] = attr['productUrl']
       json_result.append(temp_ar)

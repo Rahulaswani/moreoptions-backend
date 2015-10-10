@@ -31,7 +31,7 @@ class AmazonApi(object):
       result = self.send_request(name)
       return self.process_result(result)
     except:
-      return None 
+      return json.JSONEncoder().encode([])
 
   def get_product_name(self, data):
     """
@@ -69,10 +69,25 @@ class AmazonApi(object):
       temp_ar['productName'] = item.ItemAttributes.Title.text
 
       temp_pic = []
-      temp_pic.append(item.SmallImage.URL.text)
-      temp_pic.append(item.MediumImage.URL.text)
-      temp_pic.append(item.LargeImage.URL.text)
-      temp_ar['productImageUrls'] = temp_pic
+      temp_pic_small = {}
+      temp_pic_small['url'] = item.SmallImage.URL.text
+      temp_pic_small['height'] = str(item.SmallImage.Height)
+      temp_pic_small['width'] = str(item.SmallImage.Width)
+
+      temp_pic_medium = {}
+      temp_pic_medium['url'] = item.MediumImage.URL.text
+      temp_pic_medium['height'] = str(item.MediumImage.Height)
+      temp_pic_medium['width'] = str(item.MediumImage.Width)
+
+      temp_pic_large = {}
+      temp_pic_large['url'] = item.LargeImage.URL.text
+      temp_pic_large['height'] = str(item.LargeImage.Height)
+      temp_pic_large['width'] = str(item.LargeImage.Width)
+
+      temp_pic.append(temp_pic_small)
+      temp_pic.append(temp_pic_medium)
+      temp_pic.append(temp_pic_large)
+      temp_ar['productImage'] = temp_pic
 
       temp_ar['productSellingPrice'] = item.OfferSummary.LowestNewPrice.FormattedPrice.text
       temp_ar['productURL'] = item.DetailPageURL.text
