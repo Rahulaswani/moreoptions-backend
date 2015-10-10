@@ -1,3 +1,5 @@
+pip install django
+pip install djangorestframework
 # install amazon api
 sudo apt-get install python-lxml
 pip install python-amazon-product-api
