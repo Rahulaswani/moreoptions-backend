@@ -10,8 +10,10 @@
 import os
 import json
 import sys
+import xmltodict
 
 from amazonproduct import API
+from util.aws_signed_request import *
 from util.read_configuration import *
 from util.net.request import *
 from lxml import etree as ET
@@ -50,46 +52,72 @@ class AmazonApi(object):
     read_configuration = ReadConfiguration()
     data = read_configuration.read_conf(file_name)
     #self.num_results = data["NumResults"]
-    api = API(locale='us')
-    items = api.item_search("All", Keywords = product_name, ResponseGroup='Large',ItemPage = 1)
-    return items
+    public_key = 'AKIAIL2LL2XL7FQ5TIUQ'
+    private_key = 'CPJixs1aPS1vPzw+eZpDUMeWl0BdMy+8mfTpJIBb'
+    associate_tag = 'moreopti06-21'
+    # generate signed URL
+    request = aws_signed_request('in', {
+      'Operation': 'ItemSearch',
+      'Keywords': product_name,
+      'SearchIndex': 'All',
+      'ResponseGroup': 'Large',
+      'ItemPage': '1',
+       'sort' : 'relevancerank'}, public_key, private_key, associate_tag)
+
+    # do request
+    try:
+      response_obj = urllib.urlopen(request);
+    except IOError:
+      print "Request failed."
+      return ""
+    else:
+      response = response_obj.read()
+      return response
 
   def process_result(self, result):
     """
     Function to massage result according to our need.
     """
+    root = ET.fromstring(result)
     json_result = []
+    j = 0
     i = 0
-    for item in result:
-      if i > 2:
-        break
-      i = i+1
-      temp_ar = {}
-      temp_ar['appName'] = "Amazon"
-      temp_ar['productName'] = item.ItemAttributes.Title.text
+    for items in root:
+      j = j + 1
+      # first item is some operation info
+      if j == 1:
+        continue
+      item_result = xmltodict.parse(ET.tostring(items))
+      for item in item_result['Items']['Item']:
+        if i > 2:
+          return json.JSONEncoder().encode(json_result)
+        i = i+1
+        temp_ar = {}
+        temp_ar['appName'] = "Amazon"
+        temp_ar['productName'] = item['ItemAttributes']['Title']
 
-      temp_pic = []
-      temp_pic_small = {}
-      temp_pic_small['url'] = item.SmallImage.URL.text
-      temp_pic_small['height'] = str(item.SmallImage.Height)
-      temp_pic_small['width'] = str(item.SmallImage.Width)
+        temp_pic = []
+        temp_pic_small = {}
+        temp_pic_small['url'] = item['SmallImage']['URL']
+        temp_pic_small['height'] = str(item['SmallImage']['Height']['#text'])
+        temp_pic_small['width'] = str(item['SmallImage']['Width']['#text'])
 
-      temp_pic_medium = {}
-      temp_pic_medium['url'] = item.MediumImage.URL.text
-      temp_pic_medium['height'] = str(item.MediumImage.Height)
-      temp_pic_medium['width'] = str(item.MediumImage.Width)
+        temp_pic_medium = {}
+        temp_pic_medium['url'] = item['MediumImage']['URL']
+        temp_pic_medium['height'] = str(item['MediumImage']['Height']['#text'])
+        temp_pic_medium['width'] = str(item['MediumImage']['Width']['#text'])
 
-      temp_pic_large = {}
-      temp_pic_large['url'] = item.LargeImage.URL.text
-      temp_pic_large['height'] = str(item.LargeImage.Height)
-      temp_pic_large['width'] = str(item.LargeImage.Width)
+        temp_pic_large = {}
+        temp_pic_large['url'] = item['LargeImage']['URL']
+        temp_pic_large['height'] = str(item['LargeImage']['Height']['#text'])
+        temp_pic_large['width'] = str(item['LargeImage']['Width']['#text'])
 
-      temp_pic.append(temp_pic_small)
-      temp_pic.append(temp_pic_medium)
-      temp_pic.append(temp_pic_large)
-      temp_ar['productImage'] = temp_pic
+        temp_pic.append(temp_pic_small)
+        temp_pic.append(temp_pic_medium)
+        temp_pic.append(temp_pic_large)
+        temp_ar['productImage'] = temp_pic
 
-      temp_ar['productSellingPrice'] = item.OfferSummary.LowestNewPrice.FormattedPrice.text
-      temp_ar['productURL'] = item.DetailPageURL.text
-      json_result.append(temp_ar)
+        temp_ar['productSellingPrice'] = item['OfferSummary']['LowestNewPrice']['FormattedPrice']
+        temp_ar['productURL'] = item['DetailPageURL']
+        json_result.append(temp_ar)
     return json.JSONEncoder().encode(json_result)
