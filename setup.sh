@@ -1,5 +1,8 @@
+sudo apt-get install redis-server
+pip install redis
 pip install django
 pip install djangorestframework
+pip install django-redis-cache 
 # install amazon api
 sudo apt-get install python-lxml
 pip install python-amazon-product-api

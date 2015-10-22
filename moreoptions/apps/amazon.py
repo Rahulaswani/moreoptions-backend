@@ -117,7 +117,7 @@ class AmazonApi(object):
         temp_pic.append(temp_pic_large)
         temp_ar['productImage'] = temp_pic
 
-        temp_ar['productSellingPrice'] = item['OfferSummary']['LowestNewPrice']['FormattedPrice']
+        temp_ar['productSellingPrice'] = item['OfferSummary']['LowestNewPrice']['FormattedPrice'].split(" ")[1]
         temp_ar['productURL'] = item['DetailPageURL']
         json_result.append(temp_ar)
     return json.JSONEncoder().encode(json_result)

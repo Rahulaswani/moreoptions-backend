@@ -1,5 +1,8 @@
 {
 "AppName" : "Amazon",
 "PackageName": "in.amazon.mShop.android.shopping",
-"NumResults": 2
+"NumResults": 2,
+"AccessKey" : "AKIAIL2LL2XL7FQ5TIUQ",
+"SecretKey" : "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",
+"AssociateTag" : "moreopti06-21"
 }
